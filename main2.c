@@ -5,6 +5,9 @@
 #include <math.h>
 #include <time.h>
 
+int SWAPS = 0;
+int RECURSOES = 0;
+
 //devolve o indice da mediana entre o inicio, meio e fim do vetor
 int medianaDeTres(int vet[], int i, int f){
     int pivo, aux, indice;
@@ -79,6 +82,8 @@ void swap(int vet[], int pos1, int pos2)
 
     // Assign to the first element
     vet[pos2] = temp;
+
+    SWAPS = SWAPS +1;
 }
 
 int partitionHoare(int vet[], int ini, int fim){
@@ -169,7 +174,10 @@ void quick(int vet, int inicio, int f, int part){
 int main(){
     int vetor[] = {1,2,4,6,10,3,9,8,5};
 
+    clock_t t;
+    t = clock();
     //lomuto mediana
+
     //quick(vetor,0,8,1);
 
     //lomuto aleatorio
@@ -178,8 +186,14 @@ int main(){
     //hoare mediana
     quick(vetor,0,8,3);
 
+
     //hoare aleatorio
     //quick(vetor,0,8,4);
+
+    t = clock() - t;
+    printf ("\nSWAPS %d", SWAPS);
+    printf ("\nRECURSOES %d",RECURSOES);
+    printf("\nTEMPO%lf\n",((double)t)/((CLOCKS_PER_SEC)));
 
 
     for (int x =0;x<9;x++){
