@@ -7,8 +7,23 @@
 
 int SWAPS = 0;
 int RECURSOES = 0;
+char filename[] = "entrada-quicksort.txt";
 
-//devolve o indice da mediana entre o inicio, meio e fim do vetor
+// Troca de lugar os elementos
+void swap(int vet[], int pos1, int pos2){
+    // Copy the first position's element
+    int temp = vet[pos1];
+
+    // Assign to the second element
+    vet[pos1] = vet[pos2];
+
+    // Assign to the first element
+    vet[pos2] = temp;
+
+    SWAPS = SWAPS + 1;
+}
+
+//devolve o indice da mediana entre o inicio, meio e fim do vetor, bota o particionador escolhido no inicio
 int medianaDeTres(int vet[], int i, int f){
     int pivo, aux, indice;
     int m = floor((f-i)/2);
@@ -58,40 +73,29 @@ int medianaDeTres(int vet[], int i, int f){
             indice = m;
         }
     }
+    //coloca o particionador na frente e troca com o primeiro
+    swap(vet,i,indice);
 
     //retorna o indice do pivo
-    return m;
+    return indice;
 }
 
-//devolve um indice de um valor aleatorio no vetor
+//devolve um indice de um valor aleatorio no vetor, bota o particionador escolhido no inicio
 int aleatorio(int vet[], int i, int f){
     //escolhe um indice aleatorio entre o inicio e o final do vetor;
    int aleat = i + ( rand() % f );
+   //coloca o particionador na frente e troca com o primeiro
+   swap(vet,i,aleat);
    //retorna o indice do pivo
    return aleat;
 }
 
-// Troca de lugar os elementos
-void swap(int vet[], int pos1, int pos2)
-{
-    // Copy the first position's element
-    int temp = vet[pos1];
-
-    // Assign to the second element
-    vet[pos1] = vet[pos2];
-
-    // Assign to the first element
-    vet[pos2] = temp;
-
-    SWAPS = SWAPS +1;
-}
-
+//particiona o vetor de acordo com a tecnica de hoare
 int partitionHoare(int vet[], int ini, int fim){
 
     int i = ini;
     int f = fim;
     int pivo = vet[i];
-
 
     while (i<f){
         while(vet[f] > pivo && i < f) f--;
@@ -104,10 +108,8 @@ int partitionHoare(int vet[], int ini, int fim){
 
 }
 
-//--------------------------------------------------------------
-int partitionLomuto(int C[], int left, int right)
-//--------------------------------------------------------------
-{
+//particiona o vetor de acordo com a tecnica de lomuto
+int partitionLomuto(int C[], int left, int right){
     int chave = C[left];
     int storeindex = left + 1;  // Index of smaller element
 
@@ -150,61 +152,84 @@ void quick(int vet, int inicio, int f, int part){
             break;
     }
 
-    //coloca o particionador no inicio para particionar
-    swap(vet,inicio,p);
-
     //particiona e coloca o particionador no seu devido lugar
     if (part ==1 || part ==2){
+        RECURSOES++;
         particionador = partitionLomuto(vet, inicio, f);
     }
     else{
+        RECURSOES++;
         particionador = partitionHoare(vet, inicio, f);
     }
-
 
     //chama o quick_lomuto nos valores menores q o particionador
     quick(vet,inicio,particionador-1,part);
     //chama o quick_lomuto nos valores maiores q o particionador
     quick(vet,particionador+1,f, part);
-
 }
 
-
-
+//faz a leitura dos vetores no arquivo e executa o ordenamento
 int main(){
-    int vetor[] = {1,2,4,6,10,3,9,8,5};
 
-    clock_t t;
-    t = clock();
-    //lomuto mediana
+        FILE *in_file = fopen(filename, "r");
+        int linha = 0;
+        int size;
+        int *vetor;
 
-    //quick(vetor,0,8,1);
+        //variaveis auxiliares para calcular o tempo de execucao
+        clock_t t;
 
-    //lomuto aleatorio
-    //quick(vetor,0,8,2);
+        struct stat sb;
+        stat(filename, &sb);
 
-    //hoare mediana
-    quick(vetor,0,8,3);
+        char *file_contents = malloc(sb.st_size);
 
+        //percorre o arquivo linha por linha ate terminar.
+        //salva cada linha na variavel file_contents.
+        while (fscanf(in_file, "%[^\n] ", file_contents) != EOF) {
+            linha++; //pra comecar em 1
+            //le a quantidade de numeros, primeiro numero no arquivo
+            char *token;
+            token = strtok(file_contents, " ");
 
-    //hoare aleatorio
-    //quick(vetor,0,8,4);
+            int i=0; //contador para saber se é o primeiro token
 
-    t = clock() - t;
-    printf ("\nSWAPS %d", SWAPS);
-    printf ("\nRECURSOES %d",RECURSOES);
-    printf("\nTEMPO%lf\n",((double)t)/((CLOCKS_PER_SEC)));
+            while(token != NULL){
+                    //se for o primeiro token, eh o tamanho do vetor
+                    if(i==0){
+                        size = atoi(token);
+                        vetor = (int *)malloc(size * sizeof(int));
+                    }
+                    token = strtok(NULL, " ");
+                    vetor[i] = atoi(token);
+                    i++;
+            }
 
+        // printf("\nVETORZINHO NOVO NA AREA!!!");
+        printf("\n");
+        t = clock();
 
-    for (int x =0;x<9;x++){
-        printf ("%d ", x);
+        //ESCOLHA UMA ENTRE AS QUATRO OPCOES ABAIXO APENAS REMOVENDO O COMENTARIO
+
+        //lomuto mediana
+        quick(vetor,0,size,1);
+
+        //lomuto aleatorio
+        //quick(vetor,0,tam,2);
+
+        //hoare mediana
+        //quick(vetor,0,tam,3);
+
+        //hoare aleatorio
+        //quick(vetor,0,tam,4);
+
+        t = clock() - t;
+
+        printf ("\nTAMANHO ENTRADA %d", size);
+        printf ("\nSWAPS %d", SWAPS);
+        printf ("\nRECURSOES %d",RECURSOES);
+        printf("\nTEMPO%lf\n",((double)t)/((CLOCKS_PER_SEC)));
+
     }
     return 0;
 }
-
-
-// SAIDA::
-// TAMANHO ENTRADA 100
-// SWAPS #SWAPS
-// RECURSOES #RECURSOES
-// TEMPO #TEMPO EM SEGUNDOS
